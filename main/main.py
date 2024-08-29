@@ -10,6 +10,7 @@ from config import (
     BALL_MAX_SPEED,
     BALL_MIN_SPEED,
     COLLIDE_TRESHOLD,
+    BLOCK_PADDING
 )
 from colors import (
     bg_color,
@@ -27,7 +28,7 @@ from util import draw_text, draw_text_centered
 from aim_module import aim
 
 pygame.init()
-
+bg_image = pygame.image.load('main/img/bg.jpg')
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Breakout")
 clock = pygame.time.Clock()
@@ -41,15 +42,15 @@ rows = 6
 
 class wall:
     def __init__(self):
-        self.width = SCREEN_WIDTH // cols
+        self.width = (SCREEN_WIDTH - BLOCK_PADDING) // cols - BLOCK_PADDING
         self.height = 40
 
     def create_wall(self):
         self.blocks = {}
         for row in range(rows):
             for col in range(cols):
-                x = col * self.width
-                y = row * self.height
+                x = col * self.width + BLOCK_PADDING * (col+1)
+                y = row * self.height + BLOCK_PADDING * (row+1)
                 if row < rows // BLOCK_TYPES:
                     brick = block(3, x, y, self.width, self.height)
                 elif row < (rows // BLOCK_TYPES) * 2:
@@ -75,6 +76,7 @@ class paddle:
         self.speed = PADDLE_SPEED
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.direction = 0
+
     def reset(self):
         self.height = PADDDLE_HEIGHT
         self.width = SCREEN_WIDTH // 8
@@ -83,6 +85,7 @@ class paddle:
         self.speed = PADDLE_SPEED
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.direction = 0
+
     def move(self):
         self.direction = 0
         key = pygame.key.get_pressed()
@@ -109,7 +112,8 @@ class ball:
         self.game_over = 0
         self.max_speed = BALL_MAX_SPEED
         self.min_speed = BALL_MIN_SPEED
-    def reset(self, x , y):
+
+    def reset(self, x, y):
         self.rad = BALL_RADIUS
         self.x = x - BALL_RADIUS
         self.y = y - BALL_RADIUS * 2
@@ -121,8 +125,9 @@ class ball:
         self.min_speed = BALL_MIN_SPEED
 
     def set_speed(self, speed_x, speed_y):
-        self.speed_x=speed_x
-        self.speed_y=speed_y
+        self.speed_x = speed_x
+        self.speed_y = speed_y
+
     def draw(self):
         pygame.draw.circle(
             screen,
@@ -144,7 +149,7 @@ class ball:
             if (
                 abs(self.rect.bottom - paddle.rect.top) < COLLIDE_TRESHOLD
                 and self.speed_y > 0
-        
+
             ):
                 print("hej")
                 self.speed_x = max(
@@ -198,7 +203,8 @@ class ball:
 
 player_paddle = paddle()
 
-game_ball = ball(player_paddle.x + player_paddle.width // 2, player_paddle.rect.top)
+game_ball = ball(player_paddle.x + player_paddle.width //
+                 2, player_paddle.rect.top)
 game_wall = wall()
 player_aim = aim(
     100,
@@ -219,17 +225,20 @@ while run:
                 print("Bye")
                 break
             case pygame.KEYDOWN:
-                if not game_start and event.key == pygame.K_SPACE and game_over==0:
+                if not game_start and event.key == pygame.K_SPACE and game_over == 0:
                     game_start = True
-                    speed_x,speed_y=player_aim.calculate_speed(game_ball.max_speed)
-                    game_ball.set_speed(speed_x,speed_y)
+                    speed_x, speed_y = player_aim.calculate_speed(
+                        game_ball.max_speed)
+                    game_ball.set_speed(speed_x, speed_y)
                     print("Start Game")
                 elif not game_start and event.key == pygame.K_SPACE:
-                    game_ball.reset(player_paddle.x + player_paddle.width // 2, player_paddle.rect.top)
+                    game_ball.reset(
+                        player_paddle.x + player_paddle.width // 2, player_paddle.rect.top)
                     player_paddle.reset()
                     game_wall.create_wall()
-                    game_over=0
-    screen.fill(bg_color)
+                    game_over = 0
+    # screen.fill(bg_color)
+    screen.blit(bg_image, (0, 0))
     game_wall.draw_wall()
     player_paddle.draw()
     game_ball.draw()
