@@ -19,3 +19,5 @@ ball_outline_color = (127,0,0)
 main_text_color = (0, 0, 0)
 
 aim_color = 	(228,3,3)
+
+score_color = (255, 255, 255)

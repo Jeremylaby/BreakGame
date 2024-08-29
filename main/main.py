@@ -19,13 +19,15 @@ from colors import (
     ball_outline_color,
     main_text_color,
     aim_color,
+    score_color
 )
 import pygame
 from block_module import block
-from fonts import game_font
+from fonts import game_font, score_font
 from util import draw_text, draw_text_centered
 from aim_module import aim
 
+from score_module import score
 pygame.init()
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -155,7 +157,7 @@ class ball:
             else:
                 self.speed_x *= -1
 
-    def collision_with_wall(self, wall):
+    def collision_with_wall(self, wall, score):
         for key in list(wall.keys()):
             block = wall[key]
             if self.rect.colliderect(block):
@@ -175,11 +177,12 @@ class ball:
                     and self.speed_x > 0
                 ):
                     self.speed_x *= -1
+                score.update(block.strenght)
                 if block.take_hit():
                     del wall[key]
                     del block
 
-    def move(self, paddle, wall):
+    def move(self, paddle, wall, score):
 
         if self.rect.left < 0 or self.rect.right > SCREEN_WIDTH:
             self.speed_x *= -1
@@ -188,7 +191,7 @@ class ball:
         if self.rect.bottom > SCREEN_HEIGHT:
             self.game_over = -1
         self.colision_with_paddle(paddle)
-        self.collision_with_wall(wall.blocks)
+        self.collision_with_wall(wall.blocks, score)
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
         if len(wall.blocks) == 0:
@@ -207,6 +210,7 @@ player_aim = aim(
     screen,
     aim_color
 )
+game_score = score(screen, score_font, score_color)
 game_wall.create_wall()
 game_start = False
 game_over = 0
@@ -227,15 +231,17 @@ while run:
                 elif not game_start and event.key == pygame.K_SPACE:
                     game_ball.reset(player_paddle.x + player_paddle.width // 2, player_paddle.rect.top)
                     player_paddle.reset()
+                    game_score.reset()
                     game_wall.create_wall()
                     game_over=0
     screen.fill(bg_color)
     game_wall.draw_wall()
     player_paddle.draw()
     game_ball.draw()
+    game_score.draw()
     if game_start:
         player_paddle.move()
-        game_over = game_ball.move(player_paddle, game_wall)
+        game_over = game_ball.move(player_paddle, game_wall, game_score)
         if game_over != 0:
             game_start = False
     if game_over == -1:
