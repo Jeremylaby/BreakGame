@@ -6,11 +6,9 @@ Paddle:
 - Baunce ball.
 - At the beginning, choose the direction to shoot the ball: A key, D key, space to accept.
 Ball:
-- Movement 2d Vector.
+- Movement
 - Minimal speed.
-- Have acceleration
-- Gain speed when hit wall or block or paddle
-- Lose speed when flying
+- Gain or lose speed when hit paddle
 - Bounce on the wall.
 - Bounce on the paddle.
 - Break blocks
